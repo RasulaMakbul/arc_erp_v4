@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\CatalogueController;
 
 /*
 |--------------------------------------------------------------------------
@@ -20,3 +21,8 @@ Route::get('/', function () {
 Auth::routes();
 
 Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
+
+// Ctalogue
+Route::get('/catalogue',[CatalogueController::class,'index'])->name('catalogue');
+Route::post('/catalogue/store',[CatalogueController::class,'store'])->name('catalogue.store');
+Route::get('catalogue/search', [CatalogueController::class, 'search'])->name('catalogue.search');

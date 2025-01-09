@@ -1,4 +1,5 @@
-<h2>Must follow</h2>
+## Must follow
+
 <p><strong>after cloning the project 1st create a branch in git, than run below commands</strong></p>
 
 ## Install Project
@@ -11,4 +12,11 @@
 <p>run: php artisan serve</p>
 <p>run: npm run dev</p>
 
-<p>After changing push the project to branch and from branch request marge. follow all the notes git suggest if any conflict shows.</p>
+## Excel Error Shows
+
+<p>run: composer clear-cache</p>
+<p>run: composer require maawebsite/excel</p>
+
+## After changing push the project to branch and from branch request marge. follow all the notes git suggest if any conflict shows.
+
+## 1. Catalogue Parts adding and indexing complete, Next show,edit modal needed
