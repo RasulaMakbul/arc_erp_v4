@@ -22,9 +22,9 @@
 
 </head>
 
-<body>
+<body class="d-flex flex-column min-vh-100">
     <x-partials.navbar />
-    <div class="container-fluid">
+    <div class="container-fluid flex-grow-1">
         <div class="row">
             <x-partials.sidebar />
 
@@ -34,17 +34,11 @@
             </main>
         </div>
     </div>
+    <x-partials.footer />
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"
         integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
     <script src="{{ asset('assets/js/bootstrap.bundle.min.js') }}"></script>
-    <script>
-        $(document).ready(function() {
-            $('[data-toggle="modal"]').click(function() {
-                var targetModal = $(this).data('target');
-                $(targetModal).modal('show');
-            });
-        });
-    </script>
+
     @stack('js')
 </body>
 

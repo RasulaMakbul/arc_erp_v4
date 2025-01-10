@@ -9,26 +9,25 @@ use Illuminate\Support\Facades\Validator;
 
 class CatalogueController extends Controller
 {
-    function index(Request $request) {
-        // $cat_parts=Catalogue::all();
-        // $cat_parts = Catalogue::paginate(50);
-        $searchQuery = $request->input('search');
-    
-    $cat_parts = Catalogue::query()
-        ->when($searchQuery, function($query, $searchQuery) {
-            return $query->where('part_no', 'like', "%{$searchQuery}%")
-                         ->orWhere('nsn', 'like', "%{$searchQuery}%")
-                         ->orWhere('description', 'like', "%{$searchQuery}%");
-        })
-        ->paginate(30);
-        return view('admin.catalogue.index',compact('cat_parts','searchQuery'));
+    public function index(Request $request)
+    {
+        $query = Catalogue::query();
+
+        // Apply search filter
+        if ($request->has('search') && !empty($request->search)) {
+            $search = $request->search;
+            $query->where('part_no', 'like', "%{$search}%")
+                ->orWhere('nsn', 'like', "%{$search}%")
+                ->orWhere('description', 'like', "%{$search}%");
+        }
+
+        // Paginate the results
+        $cat_parts = $query->paginate(20); // 20 rows per page
+
+        return view('admin.catalogue.index', compact('cat_parts'));
     }
 
-
-
-
-
-
+    
 
 
 
@@ -43,13 +42,9 @@ class CatalogueController extends Controller
 
         $cat_filePath = $request->file('cat_file')->getRealPath();
 
-        // Load cat_file file using Laravel cat_file
         $rows = Excel::toArray([], $cat_filePath);
 
-        // dd($rows);
-
         foreach ($rows[0] as $row) {
-            // Modify the column indices according to your Excel file structure
             $item_no = isset($row[0]) ? $row[0] : null;
             $smr_code = isset($row[1]) ? $row[1] : null;
             $nsn = isset($row[2]) ? $row[2] : null;
@@ -58,16 +53,8 @@ class CatalogueController extends Controller
             $description = isset($row[5]) ? $row[5] : null;
             $page_no = isset($row[7]) ? $row[7] : null;
 
-            // Check if item_no is an integer, if not, skip this row
-            // if (!is_numeric($item_no)) {
-            //     continue;
-            // }
-            
-
-            // Create a new CatalogPartList instance
             $catalogPartList = new Catalogue();
 
-            // Set the values for attributes
             $catalogPartList->item_no = $item_no;
             $catalogPartList->part_no = $part_no;
             $catalogPartList->nsn = $nsn;
@@ -75,12 +62,55 @@ class CatalogueController extends Controller
             $catalogPartList->cagec = $cagec;
             $catalogPartList->page_no = $page_no;
 
-            // Save the record
             $catalogPartList->save();
         }
 
         return redirect()->back()->with('success_message', 'Excel data loaded and saved successfully.');
     }
+
+
+
+
+
+    public function update(Request $request, Catalogue $catalogue)
+    {
+        $validated = $request->validate([
+            'item_no' => 'nullable|integer',
+            'cagec' => 'nullable|string|max:255',
+            'nsn' => 'nullable|string|max:255',
+            'part_no' => 'nullable|string|max:255',
+            'description' => 'nullable|string|max:255',
+            'page_no' => 'nullable|string|max:255',
+            'image' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+        ]);
+
+        // Update the catalogue fields
+        $catalogue->item_no = $validated['item_no'] ?? $catalogue->item_no;
+        $catalogue->cagec = $validated['cagec'] ?? $catalogue->cagec;
+        $catalogue->nsn = $validated['nsn'] ?? $catalogue->nsn;
+        $catalogue->part_no = $validated['part_no'] ?? $catalogue->part_no;
+        $catalogue->description = $validated['description'] ?? $catalogue->description;
+        $catalogue->page_no = $validated['page_no'] ?? $catalogue->page_no;
+
+        // Handle the image upload
+        if ($request->hasFile('image')) {
+            // Delete the old image if it exists
+            if ($catalogue->image_path && file_exists(storage_path('app/public/' . $catalogue->image_path))) {
+                unlink(storage_path('app/public/' . $catalogue->image_path));
+            }
+
+            // Rename the uploaded image using `part_no`
+            $newImageName = $catalogue->part_no . '.' . $request->file('image')->extension();
+            $imagePath = $request->file('image')->storeAs('catalogue_images', $newImageName, 'public');
+            $catalogue->image_path = $imagePath;
+        }
+
+        // Save the updated catalogue
+        $catalogue->save();
+
+        return redirect()->back()->with('success_message', $catalogue->description.' updated successfully!');
+    }
+
 
 
    

@@ -36,6 +36,7 @@
                 <thead>
                     <tr class="text-center">
                         <th scope="col">SL</th>
+                        <th scope="col">Image</th>
                         <th scope="col">Part No</th>
                         <th scope="col">NSN</th>
                         <th scope="col">Nomenclature</th>
@@ -48,6 +49,14 @@
                     @forelse ($cat_parts as $item)
                         <tr>
                             <td>{{ $loop->iteration }}</td>
+                            <td>
+                                @if (isset($item->image_path))
+                                    <img src="{{ asset($item->image_path) }}" alt="cat img" class="img-fluid rounded"
+                                        style="height: 100px; width: 100px;">
+                                @else
+                                    <p class="text-danger">Not Available!</p>
+                                @endif
+                            </td>
                             <td @if (empty($item->part_no)) class="table-danger" @endif>{{ $item->part_no }}</td>
                             <td @if (empty($item->nsn)) class="table-danger" @endif>{{ $item->nsn }}</td>
                             <td>{{ $item->description }}</td>
@@ -70,8 +79,14 @@
 
                             {{-- {{ route('catalog_part_list.edit', $item->id) }} --}}
                             <td>
-                                <a href="" class=" btn btn-sm link-warning" comment="Edit Part"><i
-                                        class="fa-solid fa-pen-to-square fs-5"></i></a>
+                                <button type="button" class="btn btn-sm link-success" data-toggle="modal1"
+                                    data-target="#showModal{{ $item->id }}">
+                                    <i class="fa-solid fa-eye fs-5"></i></i>
+                                </button>
+                                <button type="button" class="btn btn-sm link-warning" data-toggle="modal2"
+                                    data-target="#myModal{{ $item->id }}">
+                                    <i class="fa-solid fa-pen-to-square fs-5"></i>
+                                </button>
                             </td>
                         </tr>
                     @empty
@@ -86,9 +101,7 @@
         <div class="d-flex justify-content-center">
             {{ $cat_parts->links('pagination::bootstrap-5') }}
         </div>
-        {{-- <div class="d-flex justify-content-center">
-            {{ $cat_parts->appends(['search' => request('search')])->links('pagination::bootstrap-5') }}
-        </div> --}}
+
     </div>
 
 
@@ -122,10 +135,151 @@
         </div>
     </div>
 
+    @forelse ($cat_parts as $item)
+        <div class="modal fade" id="myModal{{ $item->id }}" tabindex="-1" role="dialog"
+            aria-labelledby="myModalLabel{{ $item->id }}">
+            <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h4 class="modal-title" id="myModalLabel{{ $item->id }}">
+                            Update {{ $item->description }}
+                        </h4>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"
+                            aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form action="{{ route('catalogue.update', $item->id) }}" method="POST"
+                            enctype="multipart/form-data">
+                            @csrf
+                            @method('PATCH')
+                            <div class="row">
+
+                                <div class="col-md-6 mb-3">
+                                    <label>Item No</label>
+                                    <input type="text" name="item_no" class="form-control"
+                                        value="{{ old('item_no', $item->item_no) }}" />
+                                    @error('item_no')
+                                        <small class="text-danger">{($message)}</small>
+                                    @enderror
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label>Part No</label>
+                                    <input type="text" name="part_no" class="form-control"
+                                        value="{{ old('part_no', $item->part_no) }}" />
+                                    @error('part_no')
+                                        <small class="text-danger">{($message)}</small>
+                                    @enderror
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label>Part Identity Image</label>
+                                    <input type="file" name="image" class="form-control" />
+                                    @error('image')
+                                        <small class="text-danger">{($message)}</small>
+                                    @enderror
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label>NSN</label>
+                                    <input type="text" name="nsn" class="form-control"
+                                        value="{{ old('nsn', $item->nsn) }}" />
+                                    @error('nsn')
+                                        <small class="text-danger">{($message)}</small>
+                                    @enderror
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label>CAGEC</label>
+                                    <input type="text" name="cagec" class="form-control"
+                                        value="{{ old('cagec', $item->cagec) }}" />
+                                    @error('cagec')
+                                        <small class="text-danger">{($message)}</small>
+                                    @enderror
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label>Page No</label>
+                                    <input type="text" name="page_no" class="form-control"
+                                        value="{{ old('page_no', $item->page_no) }}" />
+                                    @error('page_no')
+                                        <small class="text-danger">{($message)}</small>
+                                    @enderror
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12 mb-3">
+                                    <label>Description</label>
+                                    <input type="text" name="description" class="form-control"
+                                        value="{{ old('description', $item->description) }}" />
+                                    @error('description')
+                                        <small class="text-danger">{($message)}</small>
+                                    @enderror
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Close</button>
+                                <button type="submit" class="btn btn-secondary">{{ __('Update') }}</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    @empty
+    @endforelse
+    @forelse ($cat_parts as $item)
+        <div class="modal fade" id="showModal{{ $item->id }}" tabindex="-1" role="dialog"
+            aria-labelledby="showModalLabel{{ $item->id }}">
+            <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h4 class="modal-title" id="showModalLabel{{ $item->description }}">
+                            {{ $item->title }}
+                        </h4>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"
+                            aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="card" style="width: auto;">
+                            {{-- <img src="{{ asset($item->image) }}" class="card-img-top" alt="{{ $item->name }}"> --}}
+                            <div class="card-body">
+                                <h5 class="card-title">{{ $item->part_no }}</h5>
+                                <p class="card-text">{{ $item->description }}</p>
+                                <p class="card-text">{{ $item->nsn }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    @empty
+    @endforelse
+
     @push('js')
         <script>
             $(document).ready(function() {
                 $('[data-toggle="modal"]').click(function() {
+                    var targetModal = $(this).data('target');
+                    $(targetModal).modal('show');
+                });
+            });
+            $(document).ready(function() {
+                $('[data-toggle="modal1"]').click(function() {
+                    var targetModal = $(this).data('target');
+                    $(targetModal).modal('show');
+                });
+            });
+            $(document).ready(function() {
+                $('[data-toggle="modal2"]').click(function() {
                     var targetModal = $(this).data('target');
                     $(targetModal).modal('show');
                 });

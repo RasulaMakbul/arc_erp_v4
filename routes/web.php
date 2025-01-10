@@ -25,4 +25,4 @@ Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name
 // Ctalogue
 Route::get('/catalogue',[CatalogueController::class,'index'])->name('catalogue');
 Route::post('/catalogue/store',[CatalogueController::class,'store'])->name('catalogue.store');
-Route::get('catalogue/search', [CatalogueController::class, 'search'])->name('catalogue.search');
+Route::patch('/catalogue/update',[CatalogueController::class,'update'])->name('catalogue.update');

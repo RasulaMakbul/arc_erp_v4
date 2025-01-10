@@ -12,8 +12,10 @@
 <p>run: php artisan serve</p>
 <p>run: npm run dev</p>
 
-## Excel Error Shows
+## Error Shows
 
+<p><strong> Run: mkdir -p storage/app/public/catalogue storage/app/public/parts</strong></p>
+<p>run: php artisan storage:link</p> 
 <p>run: composer clear-cache</p>
 <p>run: composer require maawebsite/excel</p>
 
